@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- dubbo消费者应用名称 -->
+	<dubbo:application name="zs-portal"/>
+
+	<!-- 注册中心地址，check=true关闭注册中心启动时检查 (注册订阅失败时报错)  -->
+	<dubbo:registry address="${dubbo.registry.address}" check="true" />
+
+	<!-- 服务引用，应用启动时对服务进行检查，不可直接抛出错误，默认为true,retries:容错次数 -->
+	<dubbo:reference id="demoService" interface="com.superspeed.service.DemoService" retries="2" check="false"/>
+
+
+</beans>

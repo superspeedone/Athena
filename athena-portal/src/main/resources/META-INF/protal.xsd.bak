@@ -1,0 +1,140 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.springframework.zs.com/schema/beans"
+            xmlns="http://www.springframework.zs.com/schema/beans"
+            elementFormDefault="qualified">
+
+    <!-- 一个schema 中声明的元素或者类型只能归到两种命名空间中的某一种中，这两种命名空间是：
+        无名命名空间和由targetSchema 属性指明的目标命名空间。而targetSchema 属性只能在xsd:schema
+        的定义中声明，因而，一个schema 中定义的元素或类型只可能归属于一个有名命名空间，但是当不声明targetSchema 属性时归属无名命名空间。
+
+        当elementFormDefault="qualified"时，所有全局元素及其子元素将被以缺省方式放到目标命名空间；
+        而当elementFormDefault="unqualified"时，全局元素放到目标命名空间，所有全局元素的子元素将被以
+        缺省方式放到无名命名空间。而属性的命名空间类似地由attributeFormDefault="？" 来指明。
+        需要明白的是，elementFormDefault="？" 是有作用域的，并且是被继承的，除非在子定义中覆盖父定义。 -->
+    <!---->
+
+    <!--<xsd:complexType name="component-scan">
+        <xsd:choice>
+            <xsd:sequence>
+                <xsd:element name="id" type="xsd:int" form="unqualified"></xsd:element>
+                <xsd:element name="base-package" type="xsd:string" form="qualified"></xsd:element>
+            </xsd:sequence>
+        </xsd:choice>
+    </xsd:complexType>-->
+
+    <!-- simpleType 代表自定义数据类型，也就是name 里的并不是真正的数据类型，而是根据自己的意愿定制的
+         restriction 代表对某一数据类型做约束，也就是只能取其范围之内符合要求的数据
+         attribute 元素的use 属性来定义是否是必须的属性。required 是必须值，optional 是可选值，prohibited 是无属性值 。
+                  default 属性是默认值。Pattern 元素的属性value 定义的值必须是一个正则表达式，由其限定的数据类型的值必须与其指定的模式匹配。
+         attributeGroup 属性组 -->
+
+    <!-- base types -->
+    <xsd:complexType name="identifiedType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation><![CDATA[
+                The unique identifier for a bean. The scope of the identifier
+                is the enclosing bean factory.
+			]]></xsd:documentation>
+        </xsd:annotation>
+        <xsd:attribute name="id" type="xsd:ID">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+	                The unique identifier for a bean.
+				]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:element name="beans">
+        <!-- complexType 元素含有两个子元素，在Schema 中凡是有两个以上的子元素，就认为是复杂类型-->
+        <xsd:complexType>
+            <!--sequence 表示子元素依次出现的顺序-->
+            <xsd:sequence>
+                <!-- minOccurs 代表:相同元素最少出现的次数，maxOccurs 代表:相同元素最多出现的次数，默认情况下两个都为“1”
+                     如果把minOccurs 设为“0”，表示该元素可有可无 -->
+                <xsd:element ref="description" minOccurs="0" />
+                <!--choice 可选的元素,可以表示在多个子元素中选择一个，不能全选
+                    all 表示多个子元素可以按任意次数出现-->
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element ref="bean" />
+                    <!-- 可以添加其他命名空间下的标签 -->
+                    <xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:choice>
+            </xsd:sequence>
+        </xsd:complexType>
+
+    </xsd:element>
+
+    <!-- description tag -->
+    <xsd:element name="description">
+        <xsd:annotation>
+            <xsd:documentation><![CDATA[
+                Contains informative text describing the purpose of the enclosing element.
+                Used primarily for user documentation of XML bean definition documents.
+             ]]></xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType mixed="true">
+            <xsd:choice minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="bean">
+        <xsd:annotation>
+            <xsd:documentation><![CDATA[
+                Defines a single (usually named) bean.
+                A bean definition may contain nested tags for constructor arguments,
+                property values, lookup methods, and replaced methods. Mixing constructor
+                injection and setter injection on the same bean is explicitly supported.
+            ]]></xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <!-- 复杂类型详细内容 -->
+            <xsd:complexContent>
+                <xsd:extension base="identifiedType">
+                    <xsd:group ref="beanElements"/>
+                    <xsd:attributeGroup ref="beanAttributes"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+
+    </xsd:element>
+
+    <xsd:group name="beanElements">
+        <xsd:sequence>
+            <xsd:element ref="description" minOccurs="0"/>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:element ref="property"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:group>
+
+    <xsd:attributeGroup name="beanAttributes">
+        <xsd:attribute name="name" type="xsd:string" />
+        <xsd:attribute name="class" type="xsd:string" />
+        <xsd:attribute name="parent" type="xsd:string" />
+        <xsd:attribute name="scope" type="xsd:string" />
+        <xsd:attribute name="abstract" type="xsd:boolean" />
+        <xsd:attribute name="lazy-init" default="default" type="defaultable-boolean" />
+    </xsd:attributeGroup>
+
+    <xsd:element name="property" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation><![CDATA[
+                Bean definitions can have zero or more properties.
+                Property elements correspond to JavaBean setter methods exposed
+                by the bean classes. Spring supports primitives, references to other
+                beans in the same or related factories, lists, maps and properties.
+			]]></xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <!-- simple internal types -->
+    <xsd:simpleType name="defaultable-boolean">
+        <xsd:restriction base="xsd:NMTOKEN">
+            <xsd:enumeration value="default"/>
+            <xsd:enumeration value="true"/>
+            <xsd:enumeration value="false"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

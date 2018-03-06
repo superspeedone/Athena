@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- 发布的应用的唯一名称,owner:监控系统用于计算的标签 -->
+	<dubbo:application name="zs-provider" owner="wein"/>
+	<!-- 注册中心配置，用于配置连接注册中心相关信息，注册服务地址到注册中心 -->
+	<dubbo:registry address="zookeeper://10.7.187.217:2181"/>
+	<!--<dubbo:registry address="multicast://10.7.187.217:1234"/>-->
+	<!--协议配置，用于配置提供服务的协议信息，协议由提供方指定，消费方被动接受-->
+	<dubbo:protocol name="dubbo" port="20880"/>
+	<!-- 多协议配置 -->
+	<dubbo:protocol name="rmi" port="1099" />
+
+	<!--服务配置，用于暴露一个服务，定义服务的元信息，一个服务可以用多个协议暴露，一个服务也可以注册到多个注册中心 -->
+	<dubbo:service interface="com.superspeed.service.DemoService" ref="demoService" loadbalance="roundrobin"/>
+
+	<bean id="demoService" class="com.superspeed.service.impl.DemoServiceImpl"/>
+
+	<!--针对集群负载均衡策略，1：随机（Random LoadBalance） 2：轮询（RoundRobin LoadBalance） 3：虽少活跃调用数（LeastActive LoadBalance）
+	    4：一致性hash（ConsistentHash LoadBalance）负载均衡只能针对某个接口，没法设置全局配置-->
+
+</beans>
