@@ -29,7 +29,7 @@ public class ThreadInterruptTest {
                 }
 
             }
-        }, "Thread Interrupt Test");
+        }, "Thread Interrupt User");
 
 
         thread.start();

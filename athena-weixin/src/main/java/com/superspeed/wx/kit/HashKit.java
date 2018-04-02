@@ -24,7 +24,7 @@ public class HashKit {
     }
 
     public static String md5(String srcStr){
-        return hash("MD5", srcStr);
+        return hash("DigestUtils", srcStr);
     }
 
     public static String sha1(String srcStr){

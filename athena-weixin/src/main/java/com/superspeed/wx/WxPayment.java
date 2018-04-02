@@ -118,7 +118,7 @@ public class WxPayment {
                     packageParams.put("timeStamp", System.currentTimeMillis() / 1000 + "");
                     packageParams.put("nonceStr", System.currentTimeMillis() + "");
                     packageParams.put("package", "prepay_id=" + prepay_id);
-                    packageParams.put("signType", "MD5");
+                    packageParams.put("signType", "DigestUtils");
                     String packageSign = PaymentKit.createSign(packageParams, this.wxPayConfig.getPaternerKey());
                     packageParams.put("paySign", packageSign);
                     String jsonStr = JsonKit.toJson(packageParams);
