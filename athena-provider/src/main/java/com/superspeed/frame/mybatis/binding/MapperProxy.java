@@ -1,9 +1,11 @@
 package com.superspeed.frame.mybatis.binding;
 
+import com.superspeed.frame.mybatis.annotations.Select;
 import com.superspeed.frame.mybatis.session.SqlSession;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * Mapper接口代理类
@@ -24,6 +26,10 @@ public class MapperProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Select selectAnnotation = method.getAnnotation(Select.class);
+        if (selectAnnotation != null) {
+            System.out.println("selectAnnotation:" + Arrays.toString(selectAnnotation.value()));
+        }
         MapperRegistry mapperRegistry = sqlSession.getConfiguration().getMapperRegistry();
         if (mapperRegistry.userMapperNamespace.equals(method.getDeclaringClass().getName())) {
             return sqlSession.selectOne(mapperRegistry.methodMapping.get(method.getName()) ,

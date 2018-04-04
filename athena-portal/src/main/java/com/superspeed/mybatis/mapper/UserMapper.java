@@ -2,6 +2,7 @@ package com.superspeed.mybatis.mapper;
 
 import com.superspeed.mybatis.pojo.User;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ public interface UserMapper {
 	 * @param userId 管理员ID
 	 * @return
 	 */
+	@Select("select * from cms_user u where user_id = #{userid}")
 	User getById(@Param("userId") Long userId);
 	
 	/**

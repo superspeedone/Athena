@@ -9,16 +9,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface SelectKey {
-    String[] statement();
-
-    String keyProperty();
-
-    String keyColumn() default "";
-
-    boolean before();
-
-    Class<?> resultType();
-
-    StatementType statementType() default StatementType.PREPARED;
+public @interface Select {
+    String[] value();
 }
