@@ -84,7 +84,7 @@
         <javax.activation.version>1.1.1</javax.activation.version>
         <javax.mail.version>1.5.6</javax.mail.version>
         <junit.version>4.11</junit.version>
-        <dom4j.version>1.6.1</dom4j.version>
+        <dom4j.version>2.0.1</dom4j.version>
         <xstream.version>1.3.1</xstream.version>
 
         <!-- plugins version setting -->
@@ -104,25 +104,28 @@
 
     </properties>
 
-    <!-- maven repository -->
+    <!-- set the main maven repository, look up in the the set order -->
     <repositories>
         <repository>
-            <id>public</id>
-            <url>http://10.7.187.217:8081/nexus/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>releases</id>
-            <url>http://127.0.0.1:8081/nexus/content/repositories/releases</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>public</id>
-            <url>http://10.7.187.217:8081/nexus/content/groups/public/</url>
+            <id>nexus-aliyun</id>
+            <name>Nexus aliyun</name>
+            <layout>default</layout>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
             <releases>
                 <enabled>true</enabled>
             </releases>
+        </repository>
+    </repositories>
+
+    <!-- set the plugin respository -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus-aliyun</id>
+            <name>Nexus aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -500,7 +503,8 @@
                         <!-- 引入java安全包和java.lang包 -->
                         <compilerArguments>
                             <verbose />
-                            <bootclasspath>${java.home}/lib/rt.jar;${java.home}/lib/jce.jar</bootclasspath>
+                            <!-- 这个配置很特殊：windows下使用分号（;）分隔，linux/mac下使用冒号（:）分隔 -->
+                            <bootclasspath>${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</bootclasspath>
                         </compilerArguments>
                     </configuration>
                 </plugin>
