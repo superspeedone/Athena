@@ -6,57 +6,84 @@ import java.util.concurrent.*;
 /**
  * ExecutorCompletionServiceTest
  *
+ * submit tasks to thread pool and get all executing results.
+ *
  * Created by yanweiwen on 2018/4/12.
  */
 public class ExecutorCompletionServiceTest {
 
     public static void main(String[] args) throws Throwable {
 
-        int maxThreadNum = 10;
-
-        ExecutorCompletionService<String> executorCompletionService = new ExecutorCompletionService<>(MyThreadPool.getExecutor());
-
-        for (int i = 1; i <= maxThreadNum; i++) {
-            Thread.sleep(100l);
-            executorCompletionService.submit(new MyTask(i));
+        int maxThreadNum = 100;
+        // 读写安全ArrayList,采用ReentrantLock实现锁
+        CopyOnWriteArrayList<Future<String>> futureList = new CopyOnWriteArrayList<>();
+        // 线程池
+        ExecutorService executor = ExecutorServiceFactory.getExecutor();
+        // create object of ExecutorCompletionService，实现将任务执行结果按照任务提交顺序进行存放
+        ExecutorCompletionService<String> executorCompletionService = new ExecutorCompletionService<>(executor);
+        // add task
+        for (int i = 0; i < maxThreadNum; i++) {
+            futureList.add(executorCompletionService.submit(new CallableTask(i+1)));
         }
-        for (int i = 1; i <= maxThreadNum; i++)
-            System.out.println(executorCompletionService.take().get());
-        MyThreadPool.getExecutor().shutdown();
+        // print result of task executing
+        for (int i = 0; i < maxThreadNum; i++) {
+            //System.out.println(executorCompletionService.take().get());
+            System.out.println(futureList.get(i).get());
+        }
+        // close threadPool
+        ExecutorServiceFactory.getExecutor().shutdown();
     }
 }
 
-class MyThreadPool {
+class ExecutorServiceFactory {
 
-    private static class exe {
+    private static class ThreadPool {
 
+        private static int corePoolSize = 10;
+        private static int maximumPoolSize = 50;
+        private static long keepAliveTime = 30L;
+
+        // custom thread naming factory
         private static NamedThreadFactory threadFactory = new NamedThreadFactory.Builder()
-                .daemon(false).namingPattern("MyThread-pool-%d").build();
+                .daemon(true)
+                .namingPattern("Custom-thread-pool-%d")
+                .build();
 
-        private static ExecutorService executor = new ThreadPoolExecutor(16, 50,
-                30L, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100, true), threadFactory);
+        // create threadPool
+        private static ExecutorService executor = new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<Runnable>(maximumPoolSize, true),
+                threadFactory);
     }
 
-    private MyThreadPool() {
+    private ExecutorServiceFactory() {
     }
 
     public static ExecutorService getExecutor() {
-        return exe.executor;
+        return ThreadPool.executor;
     }
 }
 
-class MyTask implements Callable<String> {
+/**
+ * custom task
+ */
+class CallableTask implements Callable<String> {
 
-    private volatile int i;
+    private final int i;
 
-    MyTask(int i) {
+    CallableTask(int i) {
         this.i = i;
     }
 
     @Override
     public String call() throws Exception {
         Thread.sleep(1000l);
-        return Thread.currentThread().getName() + "任务 :" + i;
+        return String.format("%d Thread[%s] is executing, TaskOrder -> [%d].",
+                System.currentTimeMillis(),
+                Thread.currentThread().getName() , i);
     }
 
 }
