@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!-- status : 这个用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,会看到log4j2内部各种详细输出 ,默认OFF
+	 monitorInterval : Log4j能够自动检测修改配置文件和重新配置本身, 设置间隔秒数。
+	 %d{yyyy-MM-dd HH:mm:ss, SSS} : 日志生产时间
+     %p : 日志输出格式
+     %c : logger的名称
+     %m : 日志内容,即 logger.info("message")
+     %n : 换行符
+     %C : Java类名
+     %L : 日志输出所在行数
+     %M : 日志输出所在方法名
+     hostName : 本地机器名 hostAddress : 本地ip地址
+-->
+<log4j:configuration>
+
+	<!-- 这个会打印出所有的info及以下级别的信息,每次大小超过size,则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩,作为存档-->
+	<!-- 重要的是,如果有多个ThresholdFilter,那么Filters是必须的,同时在Filters中,首先要过滤不符合的日志级别,把不需要的首先DENY掉,然后再ACCEPT需要的日志级别,这个次序不能搞颠倒。 -->
+	<appender name="RollingFile" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${LOG_HOME}/dev_${SERVER_NAME}.log" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread] %X{reqId} %X{clientIp} [%C{36}.%M():%L] - %msg%n" />
+		</layout>
+	</appender>
+
+	<!-- 控制台输出日志 -->
+	<appender name="Console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread] %X{reqId} %X{clientIp} [%C{1}.%M():%L ] - %msg%n" />
+		</layout>
+	</appender>
+
+	<appender name="Async" class="com.superspeed.utils.AsyncAppender">
+		<param name="bufferSize" value="8192" />
+		<appender-ref ref="RollingFile" />
+	</appender>
+
+	<!-- myibatis log configure -->
+	<logger name="com.apache.ibatis" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Async" />
+	</logger>
+	<logger name="org.mybatis.spring" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Async" />
+	</logger>
+	<logger name="java.sql.Connection" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Async" />
+	</logger>
+	<logger name="java.sql.Statement" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Async" />
+	</logger>
+	<logger name="java.sql.PreparedStatement" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Async" />
+	</logger>
+
+	<!-- 业务debug日志 -->
+	<logger name="com.superspeed" additivity="false">
+		<level value="${OUTPUT_LOG_LEVEL}" />
+		<appender-ref ref="Async" />
+	</logger>
+        
+	<!-- 配置日志的根节点,建立一个默认的root的logger,需要在root的level中指定输出的级别  -->
+	<root>
+		<priority value="DEBUG" />
+		<appender-ref ref="Console" />
+		<appender-ref ref="Async" />
+	</root >
+</log4j:configuration>
